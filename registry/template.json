@@ -1,0 +1,70 @@
+{
+  "id": "your-lab-clock-name",
+  "example": false,
+  "status": "self-reported",
+  "lab": {
+    "name": "Your laboratory",
+    "country": "XX",
+    "type": "clinical laboratory"
+  },
+  "clock": {
+    "name": "your_clock",
+    "family": "PhenoAge-derived (Gompertz)",
+    "description": "One or two sentences: which markers, trained on what, evaluated on what.",
+    "trained_on": "NHANES III",
+    "evaluated_on": "NHANES IV",
+    "biomarkers": [
+      {
+        "key": "marker_key",
+        "label": "Marker name",
+        "unit": "unit shown to the user",
+        "scale": 1,
+        "log": false
+      }
+    ],
+    "model": {
+      "type": "gompertz_phenoage",
+      "rate": 0,
+      "betas": {
+        "marker_key": 0,
+        "age": 0
+      },
+      "m_n": 0,
+      "m_d": 1,
+      "ba_n": 0,
+      "ba_d": 1,
+      "ba_i": 0
+    }
+  },
+  "recentering": {
+    "method": "B: lm(BA ~ age + sex), standardized residual",
+    "reference_n": 0,
+    "intercept": 0,
+    "slope_age": 0,
+    "slope_male": 0,
+    "resid_sd": 1,
+    "z_cutpoints": {
+      "p10": 0,
+      "p25": 0,
+      "p50": 0,
+      "p75": 0,
+      "p90": 0
+    },
+    "cutpoints_n": 0
+  },
+  "performance": {
+    "n_scored": 0,
+    "r_with_age": 0,
+    "rmse_regression_years": 0,
+    "rmse_identity_years": 0,
+    "mean_ba_minus_ca_years": 0
+  },
+  "cohort": {
+    "n_eligible": 0,
+    "pct_female": 0,
+    "mean_age": 0,
+    "sd_age": 0
+  },
+  "license": "CC-BY-4.0",
+  "submitted": "YYYY-MM-DD"
+}

@@ -1,0 +1,4 @@
+patient_id,age,sex,glucose,creatinine,lymph,mcv,rdw,wbc,lymph_abs
+PAC-001,55,M,95,0.9,30,88,13.2,6.5,
+PAC-002,62,F,110,1.1,25,92,14.5,7.8,
+PAC-003,48,F,88,0.7,35,86,12.8,5.2,

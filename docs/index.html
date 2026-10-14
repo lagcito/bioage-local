@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BioAge Local</title>
+<meta name="description" content="Open registry of biological age clocks and local reference models contributed by laboratories. Model parameters and aggregate statistics only.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <span class="brand">BioAge Local</span>
+  <nav><a href="#registry">Registry</a><a href="#calculator">Calculator</a><a href="#contribute">Add your lab</a><a href="#about">About</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Biological age clocks, locally referenced</h1>
+    <p class="lead">An open registry where laboratories publish the clock they use and the local reference they built for it. Entries hold model parameters and aggregate performance only. There is no patient data here, and there never will be.</p>
+  </div>
+
+  <div class="notice" role="note"><strong>Research use only.</strong> Nothing on this site is a medical device or clinical advice. Entries are submitted by laboratories and are <em>self-reported</em> unless marked verified. A local score describes a position among local peers; it does not predict mortality or measure the pace of aging.</div>
+
+  <section id="registry">
+    <h2>Registry</h2>
+    <p class="sub">Select a row to see the full model, the local reference and how it performed.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Laboratory</th><th>Clock</th><th>Markers</th><th class="num">n scored</th><th class="num">r with age</th><th class="num">Mean BA − CA (y)</th><th class="num">RMSE identity (y)</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div id="detail" class="hidden" aria-live="polite"></div>
+  </section>
+
+  <section id="calculator">
+    <h2>Calculator</h2>
+    <p class="sub">Computes biological age, the local standardized score and an approximate percentile using the parameters of the selected entry. Everything runs in your browser; nothing is sent anywhere.</p>
+    <label for="clockSel">Clock</label>
+    <select id="clockSel"></select>
+    <div class="fields" id="fields"></div>
+    <button id="go" type="button">Calculate</button>
+    <div id="calcErr" class="err" role="alert"></div>
+    <div id="out" class="hidden">
+      <div class="results" id="stats"></div>
+      <div class="bandbar" id="bar" aria-label="Position among the five local score groups"></div>
+      <p class="sub" style="margin-top:10px">Groups come from the entry's empirical percentile cut points: P1 lowest 10%, P2 next 15%, P3 middle 50%, P4 next 15%, P5 highest 10%. The percentile is interpolated from those cut points, so it is approximate.</p>
+    </div>
+  </section>
+
+  <section id="contribute">
+    <h2>Add your laboratory</h2>
+    <p class="sub">No account on this site and no server: you contribute through a pull request on GitHub.</p>
+    <ol class="steps">
+      <li>Fork the repository and copy <code>registry/template.json</code> to <code>registry/clocks/&lt;your-id&gt;.json</code>.</li>
+      <li>Fill in your clock parameters, local recentering coefficients, cut points and aggregate performance.</li>
+      <li>Run <code>python scripts/build_registry.py --check</code>. It rejects anything that looks like patient-level data.</li>
+      <li>Open a pull request. A check runs automatically; maintainers review it. New entries are shown as self-reported.</li>
+    </ol>
+    <p class="sub">Only aggregates and model parameters are accepted: no identifiers, no per-patient values, no per-patient scores.</p>
+  </section>
+
+  <section id="about">
+    <h2>About</h2>
+    <p class="sub">The reference model, <code>pheno_max_v2</code>, is a six-marker PhenoAge-derived model fitted with the BioAge R toolkit (Kwon &amp; Belsky, GeroScience 2021) on NHANES III, evaluated on NHANES IV, and recentered locally for age and sex. The survival parameters come from NHANES; the local step defines a reference and does not recalibrate mortality risk. The full pipeline, without data, is in this repository.</p>
+    <p class="sub">The entry marked <em>example</em> is synthetic and exists only to demonstrate the interface.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">Code under MIT. Registry entries carry their own license. Source and pipeline: <a href="https://github.com/lagcito/bioage-local">github.com/lagcito/bioage-local</a>.</div></footer>
+<script src="clock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

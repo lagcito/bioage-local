@@ -1,0 +1,40 @@
+# ── Datos de pacientes: nunca versionar ──────────────────────────────────
+# Datos crudos de laboratorio (identificables/cuasi-identificables)
+data_raw/
+master_PARTE*.csv
+phenoage_master_PARTE*.csv
+
+# TODA la carpeta de derivados a nivel de paciente/modelo — regla de carpeta
+# completa, no por nombre de archivo, para que un CSV nuevo ahí adentro
+# (p. ej. un futuro detalle a nivel de paciente) quede afuera de git por
+# default en vez de requerir acordarse de agregarlo a mano cada vez.
+data_derived/
+
+# Por si algo con nombre patient_id/scored queda suelto fuera de data_derived/
+clinical_scored_lite.csv
+*.rds
+
+# ── R / RStudio ──────────────────────────────────────────────────────────
+.Rhistory
+.RData
+.Rproj.user/
+*.Rout
+
+# ── SO / editores ────────────────────────────────────────────────────────
+.DS_Store
+Rplots.pdf
+
+# Local scratch, papers and branded material: never published
+tmp/
+.chart-data*/
+.obsidian/
+*.pdf
+*.pptx
+*.potx
+
+
+# Generated or local-only: never committed
+final_output/
+presentation/
+docs/registry.json
+registry/clocks/ar-mdp-pheno-max-v2.json
