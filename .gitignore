@@ -1,6 +1,6 @@
 # ── Datos de pacientes: nunca versionar ──────────────────────────────────
 # Datos crudos de laboratorio (identificables/cuasi-identificables)
-data_raw/
+data_raw
 master_PARTE*.csv
 phenoage_master_PARTE*.csv
 
@@ -8,7 +8,7 @@ phenoage_master_PARTE*.csv
 # completa, no por nombre de archivo, para que un CSV nuevo ahí adentro
 # (p. ej. un futuro detalle a nivel de paciente) quede afuera de git por
 # default en vez de requerir acordarse de agregarlo a mano cada vez.
-data_derived/
+data_derived
 
 # Por si algo con nombre patient_id/scored queda suelto fuera de data_derived/
 clinical_scored_lite.csv
@@ -34,7 +34,7 @@ tmp/
 
 
 # Generated or local-only: never committed
-final_output/
+final_output
 presentation/
 docs/registry.json
 registry/clocks/ar-mdp-pheno-max-v2.json

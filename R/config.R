@@ -1,139 +1,65 @@
 ###############################################################################
-# config.R — Panel definitions, system mappings, and toolkit constants
-#
-# This file is the single source of truth for biomarker panel composition.
-# To add or remove a biomarker, edit the relevant list here and re-run
-# the pipeline.  No other file needs to change.
-#
-# Conventions
-#   - PhenoAge Levine 2018 uses 9 biomarkers + age (age added internally)
-#   - BioAge variable names match NHANES III/IV column names
-#   - Sub-clocks are always trained via phenoage_nhanes()
+# config.R - everything a laboratory edits to adapt the pipeline to its data
 ###############################################################################
 
-# ── 1. Canonical biomarker panels ──────────────────────────────────────────
+# -- Clock definition -------------------------------------------------------
+CLOCK_NAME <- "pheno_max_v2"
 
-#' Original Levine 2018 PhenoAge: 9 biomarkers
-#' (chronological age is added by the algorithm, not listed here)
-#'
-#' Units AFTER BioAge::phenoage_nhanes() internal conversion (SI):
-#'   albumin    = g/L   (phenoage_nhanes converts: albumin = albumin_gL)
-#'   alp        = U/L   (alkaline phosphatase, no conversion)
-#'   glucose    = mmol/L (phenoage_nhanes converts: glucose = glucose_mmol)
-#'   lncrp      = log(CRP mg/dL)
-#'   lncreat    = log(creatinine μmol/L) (phenoage_nhanes: lncreat = lncreat_umol)
-#'   lymph      = lymphocyte %
-#'   mcv        = fL   (mean cell volume)
-#'   rdw        = %    (red cell distribution width)
-#'   wbc        = 1000 cells/uL
-#'
-#' IMPORTANT: When scoring new patients, convert to these SI units BEFORE
-#' passing to phenoage_calc(). The Argentine dataset uses:
-#'   albumin: g/dL × 10 → g/L
-#'   glucose: mg/dL ÷ 18.0 → mmol/L
-#'   creatinine: mg/dL × 88.4 → μmol/L; then log() for lncreat
-BIOMARKERS_PHENO_LEVINE <- c(
-  "albumin", "alp", "glucose", "lncrp", "lncreat",
-  "lymph", "mcv", "rdw", "wbc"
+# Markers of the local clock. Names follow the BioAge package conventions
+# (glucose in mmol/L, lncreat = ln of creatinine in umol/L). The survival model
+# is trained in NHANES III, so only markers that exist there can be used.
+PANEL_LOCAL <- c("glucose", "lncreat", "lymph", "mcv", "rdw", "wbc")
+
+# Comparator: the nine markers of Levine et al. (2018)
+PANEL_REFERENCE <- c("albumin", "alp", "glucose", "lncrp", "lncreat",
+                     "lymph", "mcv", "rdw", "wbc")
+
+# How each local marker is shown to a user and converted to the model scale:
+# model value = value * scale, then ln() if log = TRUE.
+BIOMARKER_META <- list(
+  glucose = list(label = "Glucose",           unit = "mg/dL",   scale = 1 / 18, log = FALSE),
+  lncreat = list(label = "Creatinine",        unit = "mg/dL",   scale = 88.4,   log = TRUE),
+  lymph   = list(label = "Lymphocytes",       unit = "%",       scale = 1,      log = FALSE),
+  mcv     = list(label = "MCV",               unit = "fL",      scale = 1,      log = FALSE),
+  rdw     = list(label = "RDW",               unit = "%",       scale = 1,      log = FALSE),
+  wbc     = list(label = "White blood cells", unit = "10^3/uL", scale = 1,      log = FALSE)
 )
 
-#' Alias: keep backward compatibility
-BIOMARKERS_PHENO_ORIG <- BIOMARKERS_PHENO_LEVINE
+# -- Local export -----------------------------------------------------------
+# Files (a glob relative to the repository root) and the identifier column.
+# The expected columns and units are documented in the README.
+LOCAL_FILES     <- "data_raw/phenoage_master_PARTE*.csv"
+LOCAL_ID_COLUMN <- "Protocolo"
+AGE_RANGE       <- c(18, 120)
 
-#' Panel shared by KDM and HD clocks (same BioAge internal names)
-#' NOTE: KDM/HD use a broader 12-biomarker set
-BIOMARKERS_KDM_HD <- c(
-  "albumin", "alp", "lncrp", "totchol",
-  "lncreat", "hba1c", "sbp", "bun",
-  "uap", "lymph", "mcv", "wbc"
+# -- Recentering ------------------------------------------------------------
+Z_CENSOR <- 5   # standardized residuals with |Z| above this are set to missing
+
+# -- Hematology flag (marked, never excluded from scoring) -------------------
+HEMATOL_WBC_MAX      <- 30   # 10^3/uL
+HEMATOL_LYMPH_PCT    <- 70   # %
+HEMATOL_LYMPH_ABSMAX <- 10   # 10^3/uL
+
+# -- External validation ----------------------------------------------------
+# Raw columns of the local export that are candidates for external validation.
+EXTERNAL_CANDIDATES <- c(
+  "hemoglobin", "hematocrit", "platelets", "mch", "mchc",
+  "neutrophils", "eosinophils", "basophils", "monocytes",
+  "lymphocyte_abs", "band_neutrophils",
+  "cholesterol", "hdl", "ldl", "non_hdl", "triglycerides", "lp_a",
+  "glucose", "hba1c", "insulin",
+  "ast", "alt", "ggt", "ldh", "albumin", "alp",
+  "ferritin", "transferrin", "transferrin_saturation",
+  "creatinine", "bun", "uric_acid", "eGFR",
+  "crp", "fibrinogen", "homocysteine",
+  "TSH", "free_t4",
+  "vitamin_d", "vitamin_b12",
+  "wbc", "rbc", "mcv", "rdw", "lymphocyte",
+  "nlr", "homa_ir"
 )
-
-#' Global PhenoAge panel — same as Levine by default.
-PANEL_GLOBAL <- BIOMARKERS_PHENO_LEVINE
-
-# ── 2. Sub-clock panel definitions ─────────────────────────────────────────
-#' Each entry maps a short name → character vector of biomarkers.
-#' All sub-clocks are trained as PhenoAge models on NHANES III.
-
-PANELS_SUB <- list(
-  # ── Organ-specific sub-clocks ──
-  hepatic_enzime_insulin    = c("alp", "ggt", "insulin"),
-  hepatic_lipid             = c("trig", "totchol"),
-  hema_integrated           = c("rdw", "mcv", "rbc", "wbc", "lymph"),
-  hema_glucose              = c("rdw", "mcv", "rbc", "wbc", "lymph", "glucose"),
-  hema_glucose_log          = c("rdw", "mcv", "rbc", "wbc", "lymph", "lnglucose"),
-  micronutrient_methylation = c("vitaminB12", "hba1c", "rdw"),
-  renal_A                   = c("lncreat", "bun"),
-
-  # ── Global sub-clocks (Levine-like) ──
-  levine_no_glucose         = c("albumin", "alp", "lncrp", "lncreat",
-                                 "lymph", "mcv", "rdw", "wbc"),
-
-  # 6 of 9 Levine biomarkers with high Argentine coverage (~63%)
-  # Omits albumin (2.3%), alp (1.7%), lncrp (1.2%)
-  pheno_max_v2              = c("glucose", "lncreat", "lymph", "mcv", "rdw", "wbc")
-)
-
-# ── 3. System-level grouping ───────────────────────────────────────────────
-#' Maps each sub-clock name to a physiological system label.
-
-PANEL_SYSTEM <- c(
-  hepatic_enzime_insulin    = "Hepatic",
-  hepatic_lipid             = "Hepatic",
-  hema_integrated           = "Hematologic",
-  hema_glucose              = "Hematologic / Metabolic",
-  hema_glucose_log          = "Hematologic / Metabolic",
-  micronutrient_methylation = "Micronutrient / Methylation",
-  renal_A                   = "Renal",
-  levine_no_glucose         = "Global (no Glucose)",
-  pheno_max_v2              = "Global (Levine 6/9)"
-)
-
-# ── 4. Published Levine 2018 PhenoAge coefficients ────────────────────────
-#' These are the EXACT published coefficients from Levine (2018) Table S2.
-#' Used for direct scoring without a trained fit object.
-#'
-#' Mortality score: xb = sum(beta_i * x_i)
-#' Then: M = 1 - exp(-exp(xb) * (exp(120*gamma) - 1) / gamma)
-#' Then: PhenoAge = 141.50225 + ln(-0.00553 * ln(1-M)) / 0.090165
-
-LEVINE_2018_COEFS <- c(
-  intercept = -19.9067,
-  albumin   =  -0.0336,   # g/dL
-  alp       =   0.00188,  # U/L
-  glucose   =   0.00553,  # mg/dL (NOTE: called "serum glucose" in paper)
-  lncrp     =   0.0954,   # log(CRP mg/dL)
-  lncreat   =   0.0095,   # log(creatinine mg/dL)
-  lymph     =  -0.0120,   # lymphocyte %
-  mcv       =   0.0268,   # fL
-  rdw       =   0.3306,   # %
-  wbc       =   0.0554,   # 1000 cells/uL
-  age       =   0.0804    # years
-)
-
-LEVINE_GAMMA_MORT   <- 0.0076927   # Gompertz mortality rate
-LEVINE_PHENOAGE_A   <- 141.50225   # PhenoAge inversion intercept
-LEVINE_PHENOAGE_B   <- -0.00553    # PhenoAge inversion factor
-LEVINE_PHENOAGE_C   <- 0.090165    # PhenoAge inversion slope
-
-# ── 5. QC thresholds ──────────────────────────────────────────────────────
-
-QC_MIN_N <- 2000
-QC_MIN_SD <- 0
-COX_MIN_N <- 200
-
-# ── 6. Mortality column detection ─────────────────────────────────────────
-
-MORT_STATUS_PATTERNS <- c("^status$", "mortstat", "dies", "dead", "outcome")
-MORT_TIME_PATTERNS   <- c("^time$", "permth_exm", "permth_int", "followup", "surv")
-
-# ── 7. Health outcome columns (from BioAge NHANES IV) ───────────────────
-
-HEALTH_OUTCOMES <- c("health", "adl", "lnwalk", "grip_scaled")
-SES_VARS <- c("edu", "annual_income", "poverty_ratio")
-
-# ── 8. Palette defaults ───────────────────────────────────────────────────
-
-HEATMAP_PALETTE <- c("blue", "white", "red")
-FOREST_COLOUR   <- "steelblue"
-KM_COLOURS      <- c("darkgreen", "gray40", "darkred")
+# Raw columns that are inputs of the clock: excluded to avoid circularity.
+CLOCK_INPUT_COLUMNS <- c("rdw", "wbc", "mcv", "glucose", "creatinine", "lymphocyte")
+# Computed from clock inputs: reported but flagged as derived.
+DERIVED_COLUMNS <- c("nlr", "eGFR", "homa_ir")
+EFFECT_THRESHOLD <- 0.10   # |Cohen d| criterion
+FDR_THRESHOLD    <- 0.05   # Benjamini-Hochberg criterion
