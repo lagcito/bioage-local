@@ -8,10 +8,12 @@ Usage:
 Standard library only. The checks are deliberately strict about privacy: an entry
 may contain model parameters and aggregate statistics, never patient-level data.
 """
-import json, re, sys, glob, os
+import json, math, re, sys, glob, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FORBIDDEN_KEY = re.compile(r"patient|paciente|protocolo|dni|birth|nacimiento|fecha|date_of|accession|mrn", re.I)
+MAX_STR = 2000         # longest string value allowed
+MAX_BYTES = 100_000    # largest entry file allowed
 MAX_LIST = 60          # longest list of numbers allowed (blocks pasted raw columns)
 MIN_N = 100            # smallest reference / scored n accepted
 STATUS = {"self-reported", "verified", "example"}
@@ -40,7 +42,7 @@ def need(d, key, kind, errs, where):
 
 
 def num(x):
-    return isinstance(x, (int, float)) and not isinstance(x, bool)
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
 
 
 def validate(e, fname):
@@ -48,6 +50,8 @@ def validate(e, fname):
     for path, k, v in walk(e):
         if FORBIDDEN_KEY.search(k):
             errs.append(f"{w}: key '{path}/{k}' looks like patient-level data and is not allowed")
+        if isinstance(v, str) and len(v) > MAX_STR:
+            errs.append(f"{w}: string at '{path}/{k}' is longer than {MAX_STR} characters")
         if isinstance(v, list) and len(v) > MAX_LIST and all(num(x) for x in v):
             errs.append(f"{w}: '{path}/{k}' is a list of {len(v)} numbers; only aggregates are allowed")
     if w != f"{e.get('id')}.json":
@@ -70,7 +74,8 @@ def validate(e, fname):
     for b in bms:
         for f in ("key", "label", "unit"):
             if not isinstance(b.get(f), str): errs.append(f"{w}: biomarker needs string '{f}'")
-        if not num(b.get("scale")): errs.append(f"{w}: biomarker '{b.get('key')}' needs numeric 'scale'")
+        if not num(b.get("scale")) or b["scale"] <= 0:
+            errs.append(f"{w}: biomarker '{b.get('key')}' needs a finite positive 'scale'")
         if not isinstance(b.get("log"), bool): errs.append(f"{w}: biomarker '{b.get('key')}' needs boolean 'log'")
         keys.add(b.get("key"))
     betas = model.get("betas", {})
@@ -105,7 +110,11 @@ def main():
     entries, errors = [], []
     for f in sorted(glob.glob(os.path.join(ROOT, "registry", "clocks", "*.json"))):
         try:
-            e = json.load(open(f, encoding="utf-8"))
+            if os.path.getsize(f) > MAX_BYTES:
+                raise ValueError(f"file larger than {MAX_BYTES} bytes")
+            def _no_const(c):
+                raise ValueError(f"'{c}' is not valid JSON")
+            e = json.load(open(f, encoding="utf-8"), parse_constant=_no_const)
         except Exception as ex:
             errors.append(f"{os.path.basename(f)}: invalid JSON ({ex})"); continue
         errors += validate(e, f)
