@@ -70,7 +70,7 @@ Once published it lives at `https://lagcito.github.io/bioage-local/`; the workfl
 1. Run the pipeline and take `final_output/registry_entry_draft.json`, or copy `registry/template.json`.
 2. Save it as `registry/clocks/<your-id>.json` and fill in the laboratory fields.
 3. Run `python scripts/build_registry.py --check`. It rejects anything that looks like patient-level data (identifier-like keys, long lists of raw numbers, non-finite numbers, oversized values, groups smaller than 100).
-4. Open a pull request. A check runs automatically and maintainers review it. The entry named `example-demo-lab` is synthetic and exists only to demonstrate the interface.
+4. Open a pull request. A check runs automatically and maintainers review it.
 
 ## Calculators
 

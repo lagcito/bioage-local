@@ -1,17 +1,17 @@
 {
-  "id": "ar-mdp-pheno-max-v2",
+  "id": "ar-six-bioage",
   "example": false,
   "status": "self-reported",
   "lab": {
     "name": "Clinical laboratory (referral sample)",
     "country": "AR",
     "type": "clinical laboratory",
-    "city": "Mar del Plata",
-    "lat": -38.0,
-    "lon": -57.54
+    "city": "Buenos Aires (province)",
+    "lat": -36.6,
+    "lon": -60.0
   },
   "clock": {
-    "name": "pheno_max_v2",
+    "name": "six-bioage",
     "family": "PhenoAge-derived (Gompertz)",
     "description": "Six-marker PhenoAge-type model fitted with the BioAge R toolkit on NHANES III and evaluated on NHANES IV. Keeps glucose, creatinine, lymphocyte %, MCV, RDW and WBC from the original nine markers; albumin, CRP and alkaline phosphatase were dropped for low local coverage.",
     "trained_on": "NHANES III",

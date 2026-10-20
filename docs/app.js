@@ -40,7 +40,7 @@
 
   var SVGNS = "http://www.w3.org/2000/svg";
   function renderMap() {
-    var M = window.AR_MAP, svg = document.getElementById("arMap"), list = document.getElementById("mapList");
+    var M = window.WORLD_MAP, svg = document.getElementById("arMap"), list = document.getElementById("mapList");
     if (!M || !svg) return;
     svg.setAttribute("viewBox", "0 0 " + M.w + " " + M.h);
     var land = document.createElementNS(SVGNS, "path");
@@ -49,7 +49,7 @@
     pinned.forEach(function (c) {
       var x = (c.lab.lon - M.lon0) * M.k * M.s, y = (M.lat1 - c.lab.lat) * M.s;
       var dot = document.createElementNS(SVGNS, "circle");
-      dot.setAttribute("cx", x.toFixed(1)); dot.setAttribute("cy", y.toFixed(1)); dot.setAttribute("r", 7);
+      dot.setAttribute("cx", x.toFixed(1)); dot.setAttribute("cy", y.toFixed(1)); dot.setAttribute("r", 8);
       dot.setAttribute("class", "pin" + (c.example ? " example" : "")); dot.setAttribute("tabindex", "0");
       dot.setAttribute("role", "button"); dot.setAttribute("aria-label", (c.lab.city || c.lab.name) + ": " + c.clock.name);
       var open = function () { showDetail(c.id); document.getElementById("detail").scrollIntoView({ behavior: "smooth", block: "nearest" }); };

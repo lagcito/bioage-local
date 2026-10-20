@@ -3,7 +3,7 @@
 ###############################################################################
 
 # -- Clock definition -------------------------------------------------------
-CLOCK_NAME <- "pheno_max_v2"
+CLOCK_NAME <- "six-bioage"
 
 # Markers of the local clock. Names follow the BioAge package conventions
 # (glucose in mmol/L, lncreat = ln of creatinine in umol/L). The survival model
