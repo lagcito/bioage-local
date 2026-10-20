@@ -9,22 +9,19 @@
 </head>
 <body>
 <header class="site"><div class="wrap">
-  <span class="brand"><i aria-hidden="true"></i>BioAge Local</span>
+  <span class="brand">BioAge Local</span>
   <nav><a href="#registry">Registry</a><a href="#map">Map</a><a href="#calculator">Calculator</a><a href="#contribute">Add your lab</a><a href="#about">About</a></nav>
 </div></header>
 
 <main class="wrap">
   <div class="hero">
-    <p class="eyebrow">Open registry · research use</p>
-    <h1>Biological age clocks, <em>locally referenced</em></h1>
+    <h1>Biological age clocks, locally referenced</h1>
     <p class="lead">An open registry where laboratories publish the clock they use and the local reference they built for it. Entries hold model parameters and aggregate performance only. There is no patient data here, and there never will be.</p>
-    <div class="strip" id="heroStats" aria-label="Registry summary"></div>
   </div>
 
   <div class="notice" role="note"><strong>Research use only.</strong> Nothing on this site is a medical device or clinical advice. Entries are submitted by laboratories and are <em>self-reported</em> unless marked verified. A local score describes a position among local peers; it does not predict mortality or measure the pace of aging.</div>
 
-  <section id="registry" class="first">
-    <span class="secnum">01</span>
+  <section id="registry">
     <h2>Registry</h2>
     <p class="sub">Select a row to see the full model, the local reference and how it performed.</p>
     <div class="tablebox"><table>
@@ -35,14 +32,12 @@
   </section>
 
   <section id="map">
-    <span class="secnum">02</span>
     <h2>Map</h2>
     <p class="sub">Where the entries come from. A pin marks a city or region, never a laboratory address, and only appears if the entry chooses to give one.</p>
     <div class="mapbox"><svg id="arMap" role="img" aria-label="World map with the locations of registered laboratories"></svg><ul id="mapList" class="maplist"></ul></div>
   </section>
 
   <section id="calculator">
-    <span class="secnum">03</span>
     <h2>Calculator</h2>
     <p class="sub">Computes biological age, the local standardized score and an approximate percentile using the parameters of the selected entry. Everything runs in your browser; nothing is sent anywhere.</p>
     <label for="clockSel">Clock</label>
@@ -53,15 +48,14 @@
     <div id="out" class="hidden">
       <div class="results" id="stats"></div>
       <div class="bandbar" id="bar" aria-label="Position among the five local score groups"></div>
-      <p class="sub" style="margin-top:10px">Groups come from the entry's empirical percentile cut points: P1 lowest 10%, P2 next 15%, P3 middle 50%, P4 next 15%, P5 highest 10%. The percentile is interpolated from those cut points, so it is approximate.</p>
+      <p class="sub">Groups come from the entry's empirical percentile cut points: P1 lowest 10%, P2 next 15%, P3 middle 50%, P4 next 15%, P5 highest 10%. The percentile is interpolated from those cut points, so it is approximate.</p>
     </div>
   </section>
 
   <section id="contribute">
-    <span class="secnum">04</span>
     <h2>Add your laboratory</h2>
     <p class="sub">No account on this site and no server: you contribute through a pull request on GitHub.</p>
-    <ol class="steps">
+    <ol>
       <li>Fork the repository and copy <code>registry/template.json</code> to <code>registry/clocks/&lt;your-id&gt;.json</code>.</li>
       <li>Fill in your clock parameters, local recentering coefficients, cut points and aggregate performance. A city and its centre (two decimals at most) are optional and put a pin on the map.</li>
       <li>Run <code>python scripts/build_registry.py --check</code>. It rejects anything that looks like patient-level data.</li>
@@ -71,43 +65,32 @@
   </section>
 
   <section id="about">
-    <span class="secnum">05</span>
     <h2>About</h2>
     <div class="prose">
-      <p>Routine blood tests already carry information about how a person is aging. A <strong>biological age clock</strong> turns a handful of those results, plus chronological age, into one number: the age at which an average person in a reference population would have the same profile. Most clocks were built in countries and laboratories far from where they end up being used, and a clock that runs well in one population can be systematically shifted in another.</p>
-      <p>BioAge Local is a place for laboratories to share <em>the clock they use and the local reference they built for it</em>, so that a result is read against local peers instead of an imported average.</p>
+      <p>A biological age clock turns a few routine blood test results, plus chronological age, into one number: the age at which an average person in a reference population would have the same profile. Most clocks are built in other countries and other laboratories, and one that works well in a population can be shifted in another.</p>
+      <p>This registry lets laboratories publish the clock they use and the local reference they built for it, so a result can be read against local peers instead of an imported average.</p>
 
-      <h3>How the reference clock is built</h3>
-    </div>
-    <div class="pipe">
-      <div><b>Train</b><span>A PhenoAge-type Gompertz model is fitted against mortality in NHANES III with the BioAge R toolkit.</span></div>
-      <div><b>Evaluate</b><span>The stored model is applied, unchanged, to NHANES IV and compared with chronological age.</span></div>
-      <div><b>Apply locally</b><span>The same model scores the laboratory's own routine results. No local survival data is needed.</span></div>
-      <div><b>Recenter</b><span>A local reference for age and sex turns each result into a standardized score and one of five groups, P1 to P5.</span></div>
-    </div>
-    <div class="prose">
-      <p>The reference model, <code>six-bioage</code>, keeps six of the nine original PhenoAge markers: glucose, creatinine, lymphocyte percentage, MCV, RDW and white blood cell count. Albumin, C-reactive protein and alkaline phosphatase were dropped because of low local coverage. The survival parameters come from NHANES; the local step only defines a reference and does not recalibrate mortality risk.</p>
+      <h3>The reference clock</h3>
+      <p>The clock <code>six-bioage</code> is a PhenoAge-type model with six of the nine original markers: glucose, creatinine, lymphocyte percentage, MCV, RDW and white blood cell count. Albumin, C-reactive protein and alkaline phosphatase were left out because of low local coverage. It was built in four steps:</p>
+      <ol>
+        <li>Fit a Gompertz model against mortality in NHANES III with the BioAge R toolkit.</li>
+        <li>Apply the stored model, unchanged, to NHANES IV and compare it with chronological age.</li>
+        <li>Apply the same model to the laboratory's routine results. No local survival data is needed.</li>
+        <li>Build a local reference for age and sex, which turns each result into a standardized score and one of five groups, P1 to P5.</li>
+      </ol>
+      <p>The survival parameters come from NHANES. The local step only defines a reference; it does not recalibrate mortality risk.</p>
 
-      <h3>How to read a score</h3>
-      <p>Biological age minus chronological age is not interpreted on its own, because it shifts with age and sex in a local population. The score is the standardized residual of biological age after accounting for age and sex in the laboratory's own reference sample. A positive score means higher than local peers of the same age and sex, and the group (P1 lowest 10%, P3 the middle 50%, P5 highest 10%) says where that falls in the local distribution.</p>
-    </div>
-    <div class="two">
-      <div class="card"><h3>What an entry contains</h3><ul>
-        <li>Model coefficients and the unit conversions of each marker</li>
-        <li>Local recentering coefficients and percentile cut points</li>
-        <li>Aggregate performance: n, correlation with age, RMSE, mean shift</li>
-        <li>Cohort summary: n, percentage female, mean age</li></ul></div>
-      <div class="card"><h3>What it never contains</h3><ul>
-        <li>Individual results, identifiers or dates</li>
-        <li>Per-patient scores or raw columns of values</li>
-        <li>Laboratory addresses; a map pin marks a city or region only</li>
-        <li>Groups smaller than 100 people</li></ul></div>
-    </div>
-    <div class="prose">
-      <h3>What this is not</h3>
-      <p>A local score is a position among local peers. It is not a diagnosis, a measure of the pace of aging or a mortality prediction for the individual. The link between the underlying model and mortality was established in NHANES, in another population, and has not been tested in local outcomes. Entries come from a single laboratory each and a referral sample is not the general population; some tests may be ordered for particular reasons, so who gets tested can shape the reference. Entries are self-reported until a maintainer marks them verified. The full pipeline, without any data, is in the repository so that other laboratories can reproduce the steps.</p>
+      <h3>Reading a score</h3>
+      <p>Biological age minus chronological age is not read on its own, because it shifts with age and sex in a local population. The score is the standardized residual of biological age after accounting for age and sex in the laboratory's own reference sample. A positive score means higher than local peers of the same age and sex. The groups are P1 (lowest 10%), P2 (next 15%), P3 (middle 50%), P4 (next 15%) and P5 (highest 10%).</p>
+
+      <h3>What an entry contains</h3>
+      <p>Model coefficients and marker unit conversions, local recentering coefficients and percentile cut points, aggregate performance (n, correlation with age, RMSE, mean shift) and a cohort summary (n, percentage female, mean age). It never contains individual results, identifiers, dates, per-patient scores or laboratory addresses. A map pin marks a city or region only, and groups smaller than 100 people are rejected.</p>
+
+      <h3>Limits</h3>
+      <p>A local score is a position among local peers. It is not a diagnosis, a measure of the pace of aging or a mortality prediction for an individual. The link between the model and mortality was established in NHANES and has not been tested against local outcomes. Each entry comes from one laboratory, and a referral sample is not the general population: who gets tested can shape the reference. Entries are self-reported until a maintainer marks them verified. The pipeline, without data, is in the repository so other laboratories can reproduce the steps.</p>
+
       <h3>References</h3>
-      <ol class="refs">
+      <ol>
         <li>Levine ME, et al. An epigenetic biomarker of aging for lifespan and healthspan. <em>Aging</em> 2018;10:573-591.</li>
         <li>Kwon D, Belsky DW. A toolkit for quantification of biological age from blood chemistry and organ function test data: BioAge. <em>GeroScience</em> 2021;43:2795-2808.</li>
       </ol>
