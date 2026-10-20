@@ -5,6 +5,9 @@
   "lab": {
     "name": "Your laboratory",
     "country": "XX",
+    "city": "Optional: city name (shown on the map)",
+    "lat": 0.0,
+    "lon": 0.0,
     "type": "clinical laboratory"
   },
   "clock": {

@@ -1,0 +1,113 @@
+{
+  "id": "ar-mdp-pheno-max-v2",
+  "example": false,
+  "status": "self-reported",
+  "lab": {
+    "name": "Clinical laboratory (referral sample)",
+    "country": "AR",
+    "type": "clinical laboratory",
+    "city": "Mar del Plata",
+    "lat": -38.0,
+    "lon": -57.54
+  },
+  "clock": {
+    "name": "pheno_max_v2",
+    "family": "PhenoAge-derived (Gompertz)",
+    "description": "Six-marker PhenoAge-type model fitted with the BioAge R toolkit on NHANES III and evaluated on NHANES IV. Keeps glucose, creatinine, lymphocyte %, MCV, RDW and WBC from the original nine markers; albumin, CRP and alkaline phosphatase were dropped for low local coverage.",
+    "trained_on": "NHANES III",
+    "evaluated_on": "NHANES IV",
+    "biomarkers": [
+      {
+        "key": "glucose",
+        "label": "Glucose",
+        "unit": "mg/dL",
+        "scale": 0.0555555555555556,
+        "log": false
+      },
+      {
+        "key": "lncreat",
+        "label": "Creatinine",
+        "unit": "mg/dL",
+        "scale": 88.4,
+        "log": true
+      },
+      {
+        "key": "lymph",
+        "label": "Lymphocytes",
+        "unit": "%",
+        "scale": 1,
+        "log": false
+      },
+      {
+        "key": "mcv",
+        "label": "MCV",
+        "unit": "fL",
+        "scale": 1,
+        "log": false
+      },
+      {
+        "key": "rdw",
+        "label": "RDW",
+        "unit": "%",
+        "scale": 1,
+        "log": false
+      },
+      {
+        "key": "wbc",
+        "label": "White blood cells",
+        "unit": "10^3/uL",
+        "scale": 1,
+        "log": false
+      }
+    ],
+    "model": {
+      "type": "gompertz_phenoage",
+      "rate": -22.0668705257035,
+      "betas": {
+        "glucose": 0.110807358187967,
+        "lncreat": 0.744418205454346,
+        "lymph": -0.0109885518011763,
+        "mcv": 0.0223505462415267,
+        "rdw": 0.286513952648369,
+        "wbc": 0.0692144804347379,
+        "age": 0.080328241527028
+      },
+      "m_n": -1.3963918582765,
+      "m_d": 0.00728303511450706,
+      "ba_n": -0.00580783083814478,
+      "ba_d": 0.0874218542335182,
+      "ba_i": 141.825449577812
+    }
+  },
+  "recentering": {
+    "method": "B: lm(BA ~ age + sex), standardized residual",
+    "reference_n": 71421,
+    "intercept": -8.32965187186572,
+    "slope_age": 1.03903756212491,
+    "slope_male": 3.04174302620009,
+    "resid_sd": 5.35511718539671,
+    "z_cutpoints": {
+      "p10": -1.06198972647871,
+      "p25": -0.636587937652719,
+      "p50": -0.13446157584084,
+      "p75": 0.454701517648988,
+      "p90": 1.13222200531967
+    },
+    "cutpoints_n": 71212
+  },
+  "performance": {
+    "n_scored": 71986,
+    "r_with_age": 0.963,
+    "rmse_regression_years": 5.54,
+    "rmse_identity_years": 7.49,
+    "mean_ba_minus_ca_years": -4.98
+  },
+  "cohort": {
+    "n_eligible": 126515,
+    "pct_female": 65.5,
+    "mean_age": 59.4,
+    "sd_age": 18.9
+  },
+  "license": "CC-BY-4.0",
+  "submitted": "2026-10-14"
+}

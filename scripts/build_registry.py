@@ -64,6 +64,19 @@ def validate(e, fname):
         errs.append(f"{w}: contributors cannot self-assign 'verified'; maintainers set it")
     lab = need(e, "lab", dict, errs, w) or {}
     need(lab, "name", str, errs, w + " lab"); need(lab, "country", str, errs, w + " lab")
+    # Optional map location: a city name and its centre, never an address. At most 2 decimals (about 1 km).
+    for f in ("lat", "lon"):
+        if f in lab:
+            v = lab[f]
+            lim = 90 if f == "lat" else 180
+            if not num(v) or not -lim <= v <= lim:
+                errs.append(f"{w}: lab.{f} must be a number in [-{lim}, {lim}]")
+            elif round(v, 2) != v:
+                errs.append(f"{w}: lab.{f} may have at most 2 decimals (city centre, not an address)")
+    if ("lat" in lab) != ("lon" in lab):
+        errs.append(f"{w}: lab.lat and lab.lon go together")
+    if "city" in lab and not isinstance(lab["city"], str):
+        errs.append(f"{w}: lab.city must be a string")
     clk = need(e, "clock", dict, errs, w) or {}
     need(clk, "name", str, errs, w + " clock")
     bms = need(clk, "biomarkers", list, errs, w + " clock") or []
