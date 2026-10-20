@@ -49,6 +49,9 @@
     pinned.forEach(function (c) {
       var x = (c.lab.lon - M.lon0) * M.k * M.s, y = (M.lat1 - c.lab.lat) * M.s;
       var dot = document.createElementNS(SVGNS, "circle");
+      var pl = document.createElementNS(SVGNS, "circle");
+      pl.setAttribute("cx", x.toFixed(1)); pl.setAttribute("cy", y.toFixed(1)); pl.setAttribute("r", 8); pl.setAttribute("class", "pulse");
+      svg.appendChild(pl);
       dot.setAttribute("cx", x.toFixed(1)); dot.setAttribute("cy", y.toFixed(1)); dot.setAttribute("r", 8);
       dot.setAttribute("class", "pin" + (c.example ? " example" : "")); dot.setAttribute("tabindex", "0");
       dot.setAttribute("role", "button"); dot.setAttribute("aria-label", (c.lab.city || c.lab.name) + ": " + c.clock.name);
@@ -60,6 +63,16 @@
       b.type = "button"; b.addEventListener("click", open); li.appendChild(b); list.appendChild(li);
     });
     if (!pinned.length) list.appendChild(el("li", null, "No entry has given a location yet."));
+  }
+
+  function renderStrip() {
+    var box = document.getElementById("heroStats"); if (!box) return;
+    var real = clocks.filter(function (c) { return !c.example; });
+    var countries = {}; real.forEach(function (c) { countries[c.lab.country] = 1; });
+    var scored = real.reduce(function (t, c) { return t + (c.performance.n_scored || 0); }, 0);
+    [[real.length, real.length === 1 ? "registered clock" : "registered clocks"], [Object.keys(countries).length, Object.keys(countries).length === 1 ? "country" : "countries"], [int(scored), "people scored"]].forEach(function (x) {
+      var d = el("div"); d.appendChild(el("b", null, x[0])); d.appendChild(el("span", null, x[1])); box.appendChild(d);
+    });
   }
 
   function showDetail(id) {
@@ -138,6 +151,7 @@
     clocks = data.clocks.slice().sort(function (a, b) { return (a.example === true) - (b.example === true); });
     renderTable();
     renderMap();
+    renderStrip();
     var sel = document.getElementById("clockSel");
     clocks.forEach(function (c) { var o = el("option", null, c.clock.name + " · " + c.lab.name); o.value = c.id; sel.appendChild(o); });
     sel.addEventListener("change", buildFields); buildFields();
